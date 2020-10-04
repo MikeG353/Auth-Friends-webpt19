@@ -1,46 +1,31 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { baseURL, axiosWithAuth } from "../api/axiosWithAuth"
+import { connect } from 'react-redux'
+import { getFriends } from '../actions'
 
 // Components
 import FriendForm from './FriendForm'
 import Friend from './Friend'
 
-class FriendsList extends React.Component {
-    state = {
-        friends: []
-    }
-    componentDidMount() {
-        this.getFriends()
-    }
-    getFriends = () => {
-        axiosWithAuth()
-            .get(`${baseURL}/friends`)
-            .then(res => {
-                this.setState({
-                    friends: res.data
+const FriendsList = props => {
+    useEffect(() => {
+        props.getFriends()
+    }, [])
+    
+    return(
+        <>
+            <FriendForm />
+            {
+                props.friends.map(friend => {
+                    return <Friend friend={friend} key={friend.id} />
                 })
-            })
-            .catch(err => {
-                if(err.response) {
-                    console.error(
-                        "Unable to retrieve friends list: ", err.response.data
-                    );
-                } else {
-                    console.error("Server response error: ", err)
-                }
-            })
-    }
-    render() {
-        return(
-            <>
-                <FriendForm />
-                {
-                    this.state.friends.map(friend => {
-                        return <Friend friend={friend} key={friend.id} />
-                    })
-                }
-            </>
-        )
+            }
+        </>
+    )    
+}
+const mapStateToProps = (state) => {
+    return {
+        friends: state.friends
     }
 }
-export default FriendsList
+export default connect(mapStateToProps, { getFriends })(FriendsList)

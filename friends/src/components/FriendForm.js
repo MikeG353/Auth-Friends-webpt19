@@ -1,69 +1,54 @@
-import React from 'react'
-import { axiosWithAuth, baseURL } from '../api/axiosWithAuth'
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { addFriend } from '../actions'
 
-class FriendForm extends React.Component {
-    state = {
-        friend: {
-            id: undefined,
-            name: '',
-            age: '',
-            email: ''
-        }
-    }
-    handleChanges = e => {
-        this.setState({
-            friend: {
-            ...this.state.friend,
+const FriendForm = (props) => {
+    const [newFriend, setNewFriend] = useState({
+        id: Date.now(),
+        name:'',
+        age:'',
+        email:''
+    })
+
+    const handleChanges = (e) => {
+        setNewFriend({
+            ...newFriend,
             [e.target.name]: e.target.value
-            }
         })
     }
-    addFriend = e => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-        axiosWithAuth()
-        .post(`${baseURL}/friends`, this.state.friend)
-        .then(res => {
-            console.log(res)
-            this.setState({
-                friends: res.data
-            })
-        })
-        .catch(err => {
-            if(err.response) {
-                console.error(
-                    "unable to add friend: error: ", err.response.data
-                );
-            } else {
-                console.error("error adding friend: ", err)
-            }
-        })
+        props.addFriend(newFriend)
     }
-    render() {
-        return (
-            <div>
-                <form onSubmit={this.addFriend}>
-                        <input
-                            type="text"
-                            name="name"
-                            value={this.state.friend.name}
-                            onChange={this.handleChanges}
-                        />
-                        <input
-                            type="age"
-                            name="age"
-                            value={this.state.friend.age}
-                            onChange={this.handleChanges}
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            value={this.state.friend.email}
-                            onChange={this.handleChanges}
-                        />
-                        <button>Add Friend</button>
-                    </form>
-                </div>
-        )
+    return (
+        <div>
+            <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        name="name"
+                        value={newFriend.name}
+                        onChange={handleChanges}
+                    />
+                    <input
+                        type="age"
+                        name="age"
+                        value={newFriend.age}
+                        onChange={handleChanges}
+                    />
+                    <input
+                        type="email"
+                        name="email"
+                        value={newFriend.email}
+                        onChange={handleChanges}
+                    />
+                    <button>Add Friend</button>
+                </form>
+            </div>
+    )
+}
+const mapStateToProps = (state) => {
+    return {
+        ...state
     }
 }
-export default FriendForm
+export default connect(mapStateToProps, {addFriend})(FriendForm)
